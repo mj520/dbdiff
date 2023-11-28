@@ -1,0 +1,7 @@
+# github.com/go-sql-driver/mysql v1.6.0
+## explicit
+github.com/go-sql-driver/mysql
+# github.com/panjf2000/ants/v2 v2.9.0
+## explicit
+github.com/panjf2000/ants/v2
+github.com/panjf2000/ants/v2/internal/sync

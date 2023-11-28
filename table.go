@@ -474,14 +474,14 @@ func CompareTables(srcs, dsts map[string]*Table) []*DiffTable {
 		})
 	}
 
-	// dst drop..
-	for k, d := range dsts {
-		result = append(result, &DiffTable{
-			Compare: DELETE,
-			Name:    k,
-			Result:  d.GenerateDropSQL(),
-		})
-	}
+	//dst drop..
+	//for k, d := range dsts {
+	//    result = append(result, &DiffTable{
+	//        Compare: DELETE,
+	//        Name:    k,
+	//        Result:  d.GenerateDropSQL(),
+	//    })
+	//}
 
 	sort.Slice(result, func(i, j int) bool {
 		return result[i].Name < result[j].Name
