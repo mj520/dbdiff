@@ -28,6 +28,7 @@ func SchemaDiff(srcDB, dstDB *DB, conf *Config) bool {
 		if err != nil {
 			log.Fatal(err)
 		}
+		var srcSnycMap sync.Map
 		srcTables := make(map[string]*Table, len(srcTableNames))
 		var srcWg sync.WaitGroup
 		srcPool, _ := ants.NewPoolWithFunc(10, func(t interface{}) {
@@ -36,7 +37,7 @@ func SchemaDiff(srcDB, dstDB *DB, conf *Config) bool {
 			if table == nil {
 				log.Fatal("load table info error", err)
 			}
-			srcTables[t.(string)] = table
+			srcSnycMap.Store(t.(string), table)
 			srcWg.Done()
 		})
 		defer srcPool.Release()
@@ -46,7 +47,11 @@ func SchemaDiff(srcDB, dstDB *DB, conf *Config) bool {
 			_ = srcPool.Invoke(t)
 		}
 		srcWg.Wait()
-
+		srcSnycMap.Range(func(key, value interface{}) bool {
+			srcTables[key.(string)] = value.(*Table)
+			return true
+		})
+		var dstSnycMap sync.Map
 		dstTableNames, err := dstDB.GetObjectList(TABLE, conf.Include, conf.Exclude)
 		if err != nil {
 			log.Fatal(err)
@@ -59,7 +64,7 @@ func SchemaDiff(srcDB, dstDB *DB, conf *Config) bool {
 			if table == nil {
 				log.Fatal("load table info error", table)
 			}
-			dstTables[t.(string)] = table
+			dstSnycMap.Store(t.(string), table)
 			dstWg.Done()
 		})
 		defer dstPool.Release()
@@ -69,7 +74,10 @@ func SchemaDiff(srcDB, dstDB *DB, conf *Config) bool {
 			_ = dstPool.Invoke(t)
 		}
 		dstWg.Wait()
-
+		dstSnycMap.Range(func(key, value interface{}) bool {
+			dstTables[key.(string)] = value.(*Table)
+			return true
+		})
 		// Compare Table.
 		result := CompareTables(srcTables, dstTables)
 		if len(result) > 0 {
