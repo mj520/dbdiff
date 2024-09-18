@@ -278,11 +278,22 @@ func (d *DB) GetObjectList(objectType ObjectType, include string, exclude string
 		}
 
 		bIgnore := false
-		if include != "" && !strings.Contains(strings.ToLower(name), include) {
-			bIgnore = true
+		if include != "" && !strings.Contains(include, strings.ToLower(name)) {
+			i := strings.Split(include, ",")
+			for _, i2 := range i {
+				if !strings.Contains(i2, strings.ToLower(name)) {
+					bIgnore = true
+				}
+			}
 		}
-		if exclude != "" && strings.Contains(strings.ToLower(name), exclude) {
-			bIgnore = true
+
+		if exclude != "" {
+			e := strings.Split(exclude, ",")
+			for _, e2 := range e {
+				if strings.Contains(strings.ToLower(name), e2) {
+					bIgnore = true
+				}
+			}
 		}
 
 		if !bIgnore {
